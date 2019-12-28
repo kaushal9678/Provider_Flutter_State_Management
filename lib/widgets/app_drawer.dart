@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/cart_screen.dart';
 import '../screens/OrderDetailScreen.dart';
+import '../screens/user_product_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key key}) : super(key: key);
@@ -28,6 +29,14 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context)
                   .pushReplacementNamed(OrderDetailScreen.routeName);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.edit),
+            title: Text("Manage Orders"),
+            onTap: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(UserProductScreen.routeName);
             },
           )
         ],
