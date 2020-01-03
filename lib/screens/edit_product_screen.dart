@@ -78,7 +78,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
+    //When using async await that means it will return Future
     final isValid = _form.currentState.validate();
     if (!isValid) {
       return;
@@ -89,14 +90,46 @@ class _EditProductScreenState extends State<EditProductScreen> {
     });
     _form.currentState.save();
     if (_editedProduct.id != null) {
-      Provider.of<ProductsProvider>(context, listen: false)
-          .updateProduct(_editedProduct.id, _editedProduct);
-      setState(() {
-        _isLoading = false;
-      });
-      Navigator.of(context).pop();
+      try {
+        await Provider.of<ProductsProvider>(context, listen: false)
+            .updateProduct(_editedProduct.id, _editedProduct);
+      } catch (e) {}
     } else {
-      Provider.of<ProductsProvider>(context, listen: false)
+      try {
+        await Provider.of<ProductsProvider>(context, listen: false)
+            .addProduct(_editedProduct);
+      } catch (e) {
+        return showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  content: Text('Something went wrong'),
+                  title: Text("An error occured"),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: Text("Retry"),
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        _saveForm();
+                      },
+                    ),
+                    FlatButton(
+                      child: Text("Okay"),
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                    )
+                  ],
+                ));
+      }
+      /* finally {
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.of(context).pop();
+      } */
+
+      /** 2nd way using future implementation */
+      /*  Provider.of<ProductsProvider>(context, listen: false)
           .addProduct(_editedProduct)
           .catchError((error) {
         return showDialog(
@@ -128,8 +161,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
           _isLoading = false;
         });
         Navigator.of(context).pop();
-      });
+      }); */
     }
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.of(context).pop();
   }
 
   @override

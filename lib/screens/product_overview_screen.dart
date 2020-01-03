@@ -16,6 +16,39 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavorites = false;
+  var _isInit = true;
+  var _isLoading = false;
+  @override
+  void initState() {
+    //the below line  wouldn't work because context wouldn't work in initState else you can hit api here
+    /*  Provider.of<ProductsProvider>(context)
+        .fetchAndSetProducts(); */
+    /** To hit API in initState  use Future delay constructor or 2nd way hit api in didChangeDependencies*/
+
+    // 1st way but always prefer 2nd way in case of Context
+
+    /*  Future.delayed(Duration.zero).then((_) {
+      Provider.of<ProductsProvider>(context).fetchAndSetProducts();
+    }); */
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<ProductsProvider>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +97,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           )
         ],
       ),
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }
